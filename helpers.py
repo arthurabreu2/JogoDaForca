@@ -5,12 +5,13 @@ from config import TENTATIVAS_ADICIONAIS, ARQUIVO_PALAVRAS_SECRETAS
 def gerar_palavra_secreta():
     """
     Função para selecionar aleatoriamente do arquivo texto
-    :return: uma palavra aleatória
+    :return: string
     """
     with open(ARQUIVO_PALAVRAS_SECRETAS, 'r') as f_obj:
-        palavra = f_obj.read().splitlines()
+        palavras = f_obj.read().splitlines()
 
-    return random.choice(palavra)
+    return random.choice(palavras)
+
 
 def verificar_letra_informada(palavra_secreta, suas_tentativas, tentativa):
     """
@@ -20,14 +21,14 @@ def verificar_letra_informada(palavra_secreta, suas_tentativas, tentativa):
     :param tentativa: letra inserida nesta jogada
     :return: retorna um status
     """
-    status = ''    # O status precisa ser zerado toda vez que a função for chamada
-    acertos = 0    # Também precisa ser zerado para esta jogada/tentativa
+    status = ''  # O status precisa ser zerado toda vez que a função for chamada
+    acertos = 0  # Também precisa ser zerado para esta jogada/tentativa
 
     for letra in palavra_secreta:
         if letra.lower() in suas_tentativas:
             status += letra
         else:
-            status += '*'   # *e*e**e**
+            status += '*'  # *e*e**e**
 
         if letra.lower() == tentativa.lower():
             acertos += 1
@@ -35,6 +36,7 @@ def verificar_letra_informada(palavra_secreta, suas_tentativas, tentativa):
     print(f"\n - Acertou {acertos} letra(s) '{tentativa}' ")
 
     return status
+
 
 def total_tentativas(palavra_secreta):
     """
@@ -45,3 +47,44 @@ def total_tentativas(palavra_secreta):
     chances = len(palavra_secreta)
     return chances + TENTATIVAS_ADICIONAIS
 
+
+def jogo(palavra_secreta):
+    """
+    Função principal do jogo
+    :param palavra_secreta: palavra secreta gerada a partir do arquivo texto
+    :return:
+    """
+    chute = 0
+    adivinhado = False
+    suas_tentativas = []
+    chances = total_tentativas(palavra_secreta)
+    total_chances = chances
+
+    print(f" - Total de chances: {chances}")
+    while chute < total_chances:
+        letra_tentativa = input("\nEntre sua letra: ")
+
+        # Diminuindo as chances de um a um
+        chances -= 1
+
+        # Se a letra ja foi informada pelo usuario
+        if letra_tentativa in suas_tentativas:
+            print(f"*** ATENÇÃO *** Você ja tentou esta letra.")
+        elif len(letra_tentativa) == 1:  # Apenas uma letra por tentativa
+            # Adicionando as letras no local correto da palavra
+            suas_tentativas.append(letra_tentativa)
+            resultado = verificar_letra_informada(palavra_secreta, suas_tentativas, letra_tentativa)
+            if resultado == palavra_secreta:
+                adivinhado = True
+                print(f"\n »»» Parabéns, você venceu! - A palabra é 'a{palavra_secreta}'. ««« ")
+                break
+            else:
+                print(f" - {' '.join(resultado)}")
+        else:
+            print(f"Entrada incorreta, informe somente uma letra.")
+
+        # Mostra quantas tentativas estão restantes
+        print(f" - Tentativas restantes: {chances}.")
+        chute += 1
+    if chute == total_chances:
+        print(f"\n *** Suas tentativas acabaram. A palavra secreta é '{palavra_secreta}'. ***")
